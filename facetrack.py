@@ -28,6 +28,7 @@ classifier_filename = './class/classifier.pkl'
 npy='./npy'
 train_img="./train_img"
 margin = 44
+outputframes = 'outputframes/'
 
 class NumpyArrayEncoder(JSONEncoder):
     def default(self, obj):
@@ -108,8 +109,9 @@ with tf.Graph().as_default():
             frame = vs.read()
 
             frame = cv2.resize(frame, (0,0), fx=0.7, fy=0.7)    #resize frame (optional)
-            #dateTimeObj = datetime.now()
-            #timestampStr = dateTimeObj.strftime("(%H:%M:%S.%f)")
+            dateTimeObj = datetime.now()
+            timestampStr = dateTimeObj.strftime("(%d:%m:%Y;%H:%M:%S.%f)")
+            timestampStr2 = dateTimeObj.strftime("%d:%m:%Y;%H:%M:%S.%f")
 
             curTime = time.time()+1    # calc fps
             timeF = frame_interval
@@ -207,6 +209,7 @@ with tf.Graph().as_default():
             #c = c+1
             count = count +1
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(outputframes+timestampStr + '.png', frame)
             cv2.imshow('Video', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -214,3 +217,8 @@ with tf.Graph().as_default():
 
         video_capture.release()
         cv2.destroyAllWindows()
+
+
+''' Each frame saved at a location
+its path written as the key or value in a json file 
+or the detected person or ID as the key and its values containing the time frame, the path to the saved frame etc'''
