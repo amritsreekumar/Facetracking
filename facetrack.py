@@ -59,13 +59,36 @@ def to_json(ID, emb_array):
     
     data = json.dumps(data, cls=NumpyArrayEncoder)
     with open(fname, 'w') as outfile:
-            json.dump(data, outfile, indent = 4)
+            json.dump(data, outfile, indent = 3)
 
 def from_json():
     f = open('embedding.json',)
     data = json.load(f)
     data = json.loads(data)
     return data
+
+
+def to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2):
+    fname = 'metadata.json'
+    new_dict = {}
+    for i in range(0,len(names_list)):
+        new_dict.update({real_ID_list[i] : names_list[i]})
+
+    dictionary = {
+    pathtoframe: [new_dict,timestampStr2]
+    }
+
+    if not os.path.isfile(fname):
+        data = dictionary
+
+    else:
+        data = json.load(open(fname))
+        data = json.loads(data)
+        data.update(dictionary)
+    
+    data = json.dumps(data, cls=NumpyArrayEncoder)
+    with open(fname, 'w') as outfile:
+            json.dump(data, outfile, indent = 3)
 
 
 with tf.Graph().as_default():
@@ -106,6 +129,8 @@ with tf.Graph().as_default():
         count = 0
         ID = []
         while True:
+            names_list = []
+            real_ID_list = []
             frame = vs.read()
 
             frame = cv2.resize(frame, (0,0), fx=0.7, fy=0.7)    #resize frame (optional)
@@ -202,6 +227,8 @@ with tf.Graph().as_default():
                             
                         cv2.putText(frame, name + " ID  " + str(real_ID), (text_x, text_y), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                                     1, (0, 0, 255), thickness=1, lineType=2)
+                        names_list.append(name)
+                        real_ID_list.append(real_ID)
                 else:
                     print('Alignment Failure')
 
@@ -209,7 +236,9 @@ with tf.Graph().as_default():
             #c = c+1
             count = count +1
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(outputframes+timestampStr + '.png', frame)
+            pathtoframe = outputframes+timestampStr
+            cv2.imwrite(pathtoframe + '.png', frame)
+            to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2)
             cv2.imshow('Video', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
