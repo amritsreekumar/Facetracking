@@ -238,6 +238,8 @@ with tf.Graph().as_default():
             #c = c+1
             count = count +1
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            if not os.path.isdir(outputframes):  
+                os.mkdir('outputframes') 
             pathtoframe = outputframes+timestampStr
             cv2.imwrite(pathtoframe + '.png', frame)
             to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2)
