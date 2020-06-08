@@ -137,7 +137,6 @@ with tf.Graph().as_default():
 
             frame = cv2.resize(frame, (0,0), fx=0.7, fy=0.7)    #resize frame (optional)
             dateTimeObj = datetime.now()
-            timestampStr = dateTimeObj.strftime("(%d:%m:%Y;%H:%M:%S.%f)")
             timestampStr2 = dateTimeObj.strftime("%d:%m:%Y;%H:%M:%S.%f")
 
             curTime = time.time()+1    # calc fps
@@ -234,13 +233,13 @@ with tf.Graph().as_default():
                 else:
                     print('Alignment Failure')
 
-            #print(str(c) + "  " + str(timestampStr))
+            #print(str(c) + "  " + str(timestampStr2))
             #c = c+1
             count = count +1
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             if not os.path.isdir(outputframes):  
                 os.mkdir('outputframes') 
-            pathtoframe = outputframes+timestampStr
+            pathtoframe = outputframes+str(timestampStr2)
             cv2.imwrite(pathtoframe + '.png', frame)
             to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2)
             cv2.imshow('Video', frame)
