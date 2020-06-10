@@ -1,8 +1,9 @@
 import json
 import cv2
 
-def retrieve_by_ID(ID):
-	f = open('metadata.json',)
+def retrieve_by_ID(source, ID):
+	outputframes = 'outputframes' + str(source) + '/'
+	f = open(outputframes + 'metadata.json',)
 	data = json.load(f)
 	data = json.loads(data)
 	for path, detail in data.items():
@@ -15,8 +16,9 @@ def retrieve_by_ID(ID):
 				if cv2.waitKey(200) & 0xFF == ord('q'):
 					break
 
-def retrieve_by_name(name):
-	f = open('metadata.json',)
+def retrieve_by_name(source, name):
+	outputframes = 'outputframes' + str(source) + '/'
+	f = open(outputframes + 'metadata.json',)
 	data = json.load(f)
 	data = json.loads(data)
 	for path, detail in data.items():
@@ -30,8 +32,9 @@ def retrieve_by_name(name):
 					break
 
 
-def retrieve_by_date(date):
-	f = open('metadata.json',)
+def retrieve_by_date(source, date):
+	outputframes = 'outputframes' + str(source) + '/'
+	f = open(outputframes + 'metadata.json',)
 	data = json.load(f)
 	data = json.loads(data)
 	for path, detail in data.items():
@@ -44,8 +47,9 @@ def retrieve_by_date(date):
 				break
 
 
-def retrieve_by_datetime(date, time):
-	f = open('metadata.json',)
+def retrieve_by_datetime(source, date, time):
+	outputframes = 'outputframes' + str(source) + '/'
+	f = open(outputframes + 'metadata.json',)
 	data = json.load(f)
 	data = json.loads(data)
 	datetime = date + ';' + time
@@ -58,9 +62,9 @@ def retrieve_by_datetime(date, time):
 			if cv2.waitKey(200) & 0xFF == ord('q'):
 				break
 
-#retrieve_by_ID('0')
-#retrieve_by_name('Amrit')
-#retrieve_by_date('08:06:2020')
-retrieve_by_datetime('08:06:2020','12:20')
+#retrieve_by_ID(0,'0')
+retrieve_by_name(0,'Amrit')
+#retrieve_by_date(0,'08:06:2020')
+#retrieve_by_datetime(0,'08:06:2020','12:20')
 
 

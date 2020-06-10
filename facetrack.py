@@ -24,13 +24,13 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 
-input_video="akshay_mov.mp4"
 modeldir = './model/20170511-185253.pb'
 classifier_filename = './class/classifier.pkl'
 npy='./npy'
 train_img="./train_img"
 margin = 44
-outputframes = 'outputframes/'
+source = 0
+outputframes = 'outputframes' + str(source) + '/'
 
 class NumpyArrayEncoder(JSONEncoder):
     def default(self, obj):
@@ -71,7 +71,7 @@ def from_json():
 
 
 def to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2):
-    fname = 'metadata.json'
+    fname = outputframes + 'metadata.json'
     new_dict = {}
     for i in range(0,len(names_list)):
         new_dict.update({real_ID_list[i] : names_list[i]})
@@ -120,7 +120,7 @@ with tf.Graph().as_default():
         with open(classifier_filename_exp, 'rb') as infile:
             (model, class_names) = pickle.load(infile)
 
-        vs = WebcamVideoStream(src=0).start()
+        vs = WebcamVideoStream(src=source).start()
         fps = FPS().start()
         c = 0
 
@@ -238,7 +238,7 @@ with tf.Graph().as_default():
             count = count +1
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             if not os.path.isdir(outputframes):  
-                os.mkdir('outputframes') 
+                os.mkdir(outputframes) 
             pathtoframe = outputframes+str(timestampStr2)
             cv2.imwrite(pathtoframe + '.png', frame)
             to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2)
