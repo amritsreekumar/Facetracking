@@ -19,18 +19,51 @@ from imutils.video import FPS
 import pickle
 import json
 from json import JSONEncoder
+import argparse
+from configparser import SafeConfigParser
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
-
-modeldir = './model/20170511-185253.pb'
-classifier_filename = './class/classifier.pkl'
-npy='./npy'
-train_img="./train_img"
-margin = 44
+#Camera input source
 source = 0
-outputframes = 'outputframes' + str(source) + '/'
+
+
+CONFIG_FILE = "settings.conf"
+CONFIG_SECTION = "settings"
+threshold = [0.6, 0.8, 0.9]
+
+class facetrack():
+    def __init__(self):
+        parser = SafeConfigParser()
+        parser.read(CONFIG_FILE)
+        self.classifier_pickle = parser.get(CONFIG_SECTION,"classifier_pickle")
+        self.modelCNN = parser.get(CONFIG_SECTION,"model")
+        self.embedding_file = parser.get(CONFIG_SECTION,"embedding_file")
+        self.npy = parser.get(CONFIG_SECTION,"npy")
+        self.outputframes = parser.get(CONFIG_SECTION,"outputframes")
+        self.metadata = parser.get(CONFIG_SECTION,"metadata")
+        self.gpu_memory_fraction = parser.getfloat(CONFIG_SECTION,"gpu_memory_fraction")
+        self.margin = parser.getint(CONFIG_SECTION,"margin")
+        self.frame_interval = parser.getint(CONFIG_SECTION,"frame_interval")
+        self.image_size = parser.getint(CONFIG_SECTION,"image_size")
+        self.input_image_size = parser.getint(CONFIG_SECTION,"input_image_size")
+        self.batch_size = parser.getint(CONFIG_SECTION,"batch_size")
+        self.minsize = parser.getint(CONFIG_SECTION,"minsize")
+        self.factor = parser.getfloat(CONFIG_SECTION,"factor")
+
+trackobject = facetrack()
+
+
+minsize = trackobject.minsize  # minimum size of face
+factor = trackobject.factor  # scale factor
+margin = trackobject.margin
+frame_interval = trackobject.frame_interval
+batch_size = trackobject.batch_size
+image_size = trackobject.image_size
+input_image_size = trackobject.input_image_size
+outputframes = trackobject.outputframes + str(source) + '/'
+
 
 class NumpyArrayEncoder(JSONEncoder):
     def default(self, obj):
@@ -40,7 +73,7 @@ class NumpyArrayEncoder(JSONEncoder):
 
 def to_json(ID, emb_array):
 
-    fname = 'embedding.json'
+    fname = trackobject.embedding_file
     emb_array = np.array(emb_array)
     
     # Data to be written 
@@ -64,14 +97,14 @@ def to_json(ID, emb_array):
             json.dump(data, outfile, indent = 3)
 
 def from_json():
-    f = open('embedding.json',)
+    f = open(trackobject.embedding_file,)
     data = json.load(f)
     data = json.loads(data)
     return data
 
 
 def to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2):
-    fname = outputframes + 'metadata.json'
+    fname = outputframes + trackobject.metadata
     new_dict = {}
     for i in range(0,len(names_list)):
         new_dict.update({real_ID_list[i] : names_list[i]})
@@ -94,29 +127,20 @@ def to_metadata(pathtoframe, names_list, real_ID_list, timestampStr2):
 
 
 with tf.Graph().as_default():
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=trackobject.gpu_memory_fraction)
     sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
     with sess.as_default():
-        pnet, rnet, onet = detect_face.create_mtcnn(sess, npy)
-
-        minsize = 20  # minimum size of face
-        threshold = [0.6, 0.7, 0.7]  # three steps's threshold
-        factor = 0.709  # scale factor
-        margin = 44
-        frame_interval = 1
-        batch_size = 1000
-        image_size = 182
-        input_image_size = 160
+        pnet, rnet, onet = detect_face.create_mtcnn(sess, trackobject.npy)
         
         print('Loading Model')
-        facenet.load_model('model.pb')
+        facenet.load_model(trackobject.modelCNN)
         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
         embedding_size = embeddings.get_shape()[1]
 
 
-        classifier_filename_exp = os.path.expanduser('my_classifier.pkl')
+        classifier_filename_exp = os.path.expanduser(trackobject.classifier_pickle)
         with open(classifier_filename_exp, 'rb') as infile:
             (model, class_names) = pickle.load(infile)
 
