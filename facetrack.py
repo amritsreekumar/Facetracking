@@ -55,8 +55,8 @@ class facetrack():
 trackobject = facetrack()
 
 
-minsize = trackobject.minsize  # minimum size of face
-factor = trackobject.factor  # scale factor
+minsize = trackobject.minsize 
+factor = trackobject.factor  
 margin = trackobject.margin
 frame_interval = trackobject.frame_interval
 batch_size = trackobject.batch_size
