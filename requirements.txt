@@ -7,7 +7,7 @@ matplotlib
 Pillow
 requests
 psutil
-numpy==1.16.2
+numpy==1.22.0
 imutils
 cv2==4.2.0
 sklearn
